@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install backend deps
+        working-directory: backend
+        run: npm ci
+      - name: Run backend tests
+        working-directory: backend
+        env:
+          JWT_SECRET: test-secret
+        run: npm test
+      - name: Install frontend deps
+        working-directory: frontend
+        run: npm ci
+      - name: Run frontend tests (placeholder)
+        working-directory: frontend
+        run: echo "no frontend tests configured"
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build

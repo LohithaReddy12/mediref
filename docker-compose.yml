@@ -1,0 +1,32 @@
+services:
+  backend:
+    build: ./backend
+    env_file:
+      - .env
+    ports:
+      - "${BACKEND_PORT:-4000}:4000"
+    volumes:
+      - ./backend:/usr/src/app
+      - /usr/src/app/node_modules
+      - ./backend/data:/usr/src/app/data
+      - ./backend/data/files:/usr/src/app/data/files
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    env_file:
+      - .env
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    volumes:
+      - ./frontend:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - VITE_BACKEND_URL=http://backend:${BACKEND_INTERNAL_PORT:-4000}
+    restart: unless-stopped
+

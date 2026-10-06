@@ -1,0 +1,135 @@
+openapi: 3.0.3
+info:
+  title: MedRef Core API
+  version: 0.1.0
+  description: Core endpoints for document ingestion, search, and AI assistant (skeleton).
+servers:
+  - url: https://api.medref.example.com/v1
+paths:
+  /auth/login:
+    post:
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: OK
+  /documents:
+    post:
+      summary: Upload a document (multipart)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                profile_id:
+                  type: string
+                source:
+                  type: string
+      responses:
+        '201':
+          description: Document created; returns document id and ingest status
+    get:
+      summary: List documents with filters
+      parameters:
+        - in: query
+          name: profile_id
+          schema:
+            type: string
+        - in: query
+          name: type
+          schema:
+            type: string
+        - in: query
+          name: tag
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of documents
+  /documents/{id}:
+    get:
+      summary: Get document metadata and URLs
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Document metadata
+  /documents/{id}/ingest:
+    post:
+      summary: Trigger OCR & metadata extraction for a document
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '202':
+          description: Ingest started
+  /search/semantic:
+    post:
+      summary: Semantic search over documents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                profile_id:
+                  type: string
+                query:
+                  type: string
+                top_k:
+                  type: integer
+      responses:
+        '200':
+          description: Search results with source references
+  /assistant/query:
+    post:
+      summary: Ask the AI assistant about records
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                profile_id:
+                  type: string
+                query:
+                  type: string
+                scope:
+                  type: string
+                provenance:
+                  type: boolean
+      responses:
+        '200':
+          description: Assistant response with summary and sources
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - bearerAuth: []
